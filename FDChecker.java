@@ -25,7 +25,44 @@ public class FDChecker {
 		//		t = closure(t) intersect table
 		//		result = result union t
 		//if b is contained in result, the dependency is preserved
-		return false;
+		
+		Iterator<FunctionalDependency> iterateFDS= fds.iterator();
+		AttributeSet result= new AttributeSet();
+		FunctionalDependency fd;
+		
+		while(iterateFDS.hasNext()) {
+			fd= iterateFDS.next();
+			result.addAll(fd.left);
+			Boolean notStable= true;
+			while (notStable) {
+				//checking for a and its FDs in t1
+				AttributeSet temp1= new AttributeSet();
+				temp1.addAll(t1);
+				temp1.retainAll(result);
+				temp1= closure(temp1, fds);
+				temp1.retainAll(t1);
+				notStable= result.addAll(temp1);
+				
+				AttributeSet temp2= new AttributeSet();
+				temp2.addAll(t2);
+				temp2.retainAll(result);
+				temp2= closure(temp2, fds);
+				temp2.retainAll(t2);
+
+				notStable= result.addAll(temp2) || notStable;
+			}
+
+			if (!result.contains(fd.right)) {
+				return false;}
+		}
+		
+		return true;
+	}
+        
+        public static AttributeSet intersect(AttributeSet a, AttributeSet b){
+		AttributeSet intersect = new AttributeSet(a);
+		intersect.retainAll(b);
+		return intersect;
 	}
 
 	/**
@@ -44,12 +81,50 @@ public class FDChecker {
 		//original table.
 		//a decomposition is lossless if the common attributes for a superkey for one of the
 		//tables.
-		return false;
+		boolean lossless = false;
+
+		AttributeSet intersect= intersect(t1,t2);
+		AttributeSet closure= closure(intersect, fds);
+		if(closure.containsAll(t1) || closure.containsAll(t2)){
+			lossless = true;
+		}
+		return lossless;
 	}
 
 	//recommended helper method
 	//finds the total set of attributes implied by attrs
-	private static AttributeSet closure(AttributeSet attrs, Set<FunctionalDependency> fds) {
-		return null;
+	public static AttributeSet closure(AttributeSet attrs, Set<FunctionalDependency> fds) {
+		Iterator<FunctionalDependency> iterateFDS= fds.iterator();
+		AttributeSet closure= new AttributeSet();
+		closure.addAll(attrs);
+		FunctionalDependency fd;
+		Boolean unStable= true;
+		while (unStable) {
+			Boolean breakLoop= false;
+			while (iterateFDS.hasNext()) {
+				AttributeSet leftSet= new AttributeSet();
+				AttributeSet leftIntersect= new AttributeSet();
+				fd= iterateFDS.next();
+				leftSet.addAll(fd.left);
+				//left intersect = all left attributes that are in closure
+				leftIntersect.addAll(fd.left);
+				leftIntersect.retainAll(closure);
+				
+				if (leftSet.equals(leftIntersect)) {
+					breakLoop= closure.add(fd.right);
+					break;
+				} 
+			}
+			unStable= breakLoop? true : false;
+			if (breakLoop) {
+				if (!iterateFDS.hasNext()) {
+					iterateFDS= null;
+					iterateFDS= fds.iterator();
+					breakLoop= false;
+				}
+			}
+
+		}
+		return closure;
 	}
 }
