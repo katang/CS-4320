@@ -58,12 +58,6 @@ public class FDChecker {
 		
 		return true;
 	}
-        
-        public static AttributeSet intersect(AttributeSet a, AttributeSet b){
-		AttributeSet intersect = new AttributeSet(a);
-		intersect.retainAll(b);
-		return intersect;
-	}
 
 	/**
 	 * Checks whether a decomposition of a table is lossless
@@ -83,7 +77,8 @@ public class FDChecker {
 		//tables.
 		boolean lossless = false;
 
-		AttributeSet intersect= intersect(t1,t2);
+		AttributeSet intersect = new AttributeSet(t1);
+		intersect.retainAll(t2);
 		AttributeSet closure= closure(intersect, fds);
 		if(closure.containsAll(t1) || closure.containsAll(t2)){
 			lossless = true;
