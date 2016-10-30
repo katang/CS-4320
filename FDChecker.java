@@ -88,7 +88,7 @@ public class FDChecker {
 
 	//recommended helper method
 	//finds the total set of attributes implied by attrs
-	public static AttributeSet closure(AttributeSet attrs, Set<FunctionalDependency> fds) {
+	private static AttributeSet closure(AttributeSet attrs, Set<FunctionalDependency> fds) {
 		Iterator<FunctionalDependency> iterateFDS= fds.iterator();
 		AttributeSet closure= new AttributeSet();
 		closure.addAll(attrs);

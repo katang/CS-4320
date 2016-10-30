@@ -1,10 +1,9 @@
-
 import static org.junit.Assert.*;
 import java.util.*;
 
 public class Test {
 
-	@org.junit.Test
+	//@org.junit.Test
 	public void depPresBasictest() {
 		AttributeSet t1 = new AttributeSet();
 		AttributeSet t2 = new AttributeSet();
@@ -65,6 +64,7 @@ public class Test {
 		t1.add(new Attribute("a"));
 		t1.add(new Attribute("b"));
 		t2.add(new Attribute("b"));
+		t1.add(new Attribute("c"));
 		
 		fds.add(new FunctionalDependency(t1,new Attribute("b")));
 
@@ -84,8 +84,69 @@ public class Test {
 		// ab -> b
 		// b -> a
 		assertTrue(FDChecker.checkDepPres(t1, t2, fds));
+		
+		fds.add(new FunctionalDependency(t2, new Attribute("c")));
+		assertTrue(FDChecker.checkDepPres(t1, t2, fds));
+		
+		AttributeSet fd= new AttributeSet();
+		fd.add(new Attribute("a"));
+		fd.add(new Attribute("b"));
+		fds.add(new FunctionalDependency(fd, new Attribute("c")));
+		assertTrue(FDChecker.checkDepPres(t1, t2, fds));
+		
+		t2.add(new Attribute("d"));
+		
+		AttributeSet fd3= new AttributeSet();
+		fd3.add(new Attribute("a"));
+		fd3.add(new Attribute("b"));
+		fds.add(new FunctionalDependency(fd3, new Attribute("d")));
+		assertFalse(FDChecker.checkDepPres(t1, t2, fds));
+		
+		fds.remove(fd3);
+		
+		AttributeSet fd2= new AttributeSet();
+		fd2.add(new Attribute("a"));
+		fds.add(new FunctionalDependency(fd2, new Attribute("d")));
+		assertFalse(FDChecker.checkDepPres(t1, t2, fds));
+		
 	}
-
+	
+	//@org.junit.Test
+	public void closureTest() {
+		// remember to change closure() back to private function
+		Set<FunctionalDependency> fds = new HashSet<FunctionalDependency>();
+		AttributeSet fd= new AttributeSet();
+		fd.add(new Attribute("a"));
+		fd.add(new Attribute("b"));
+		fds.add(new FunctionalDependency(fd, new Attribute("c")));
+		
+		AttributeSet fd1= new AttributeSet();
+		fd1.add(new Attribute("c"));
+		fds.add(new FunctionalDependency(fd1, new Attribute("d")));
+		
+		AttributeSet fd2= new AttributeSet();
+		fd2.add(new Attribute("a"));
+		fd2.add(new Attribute("d"));
+		fds.add(new FunctionalDependency(fd2, new Attribute("e")));
+		
+		AttributeSet attrs= new AttributeSet();
+		attrs.add(new Attribute("a"));
+		attrs.add(new Attribute("c"));
+		
+		// fds
+		// ab -> c
+		// c -> d
+		// ad -> e
+		
+		AttributeSet closure= new AttributeSet();
+		closure.add(new Attribute("a"));
+		closure.add(new Attribute("e"));
+		closure.add(new Attribute("c"));
+		closure.add(new Attribute("d"));
+		//assertEquals(FDChecker.closure(attrs, fds), closure);
+		
+	}
+	
 	@org.junit.Test
 	public void losslesstest() {
 		AttributeSet t1 = new AttributeSet();
@@ -116,5 +177,30 @@ public class Test {
 		// b -> c
 		// b -> d
 		assertTrue(FDChecker.checkLossless(t1, t2, fds));
+		
+		AttributeSet temp1 = new AttributeSet();
+		temp1.add(new Attribute("d"));
+		fds.add(new FunctionalDependency(temp, new Attribute("e")));
+		t2.add(new Attribute("e"));
+		assertTrue(FDChecker.checkLossless(t1, t2, fds));
+		
+		
+		AttributeSet temp2 = new AttributeSet();
+		temp2.add(new Attribute("a"));
+		fds.add(new FunctionalDependency(temp2,new Attribute("b")));
+		assertTrue(FDChecker.checkLossless(t1, t2, fds));
+		
+		AttributeSet t3 = new AttributeSet();
+		AttributeSet t4 = new AttributeSet();
+		Set<FunctionalDependency> fds2 = new HashSet<FunctionalDependency>();
+		
+		t4.add(new Attribute("a"));
+		t3.add(new Attribute("b"));
+		assertFalse(FDChecker.checkLossless(t3, t4, fds2));
+		
+		t4.add(new Attribute("b"));
+		assertTrue(FDChecker.checkLossless(t3, t4, fds2));
+		
+		
 	}
 }
